@@ -1,4 +1,27 @@
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
 *{{ .Labels.alertname | Title }} - {{.Status | Title }} ({{.Labels.severity | toUpper }})*
+-------------------------------------
+{{- if eq .Status "firing" }}
+startedAt: _{{ .StartsAt }}_
+{{- end }}
+{{- if eq .Status "resolved" }}
+startedAt: _{{ .StartsAt }}_
+endedAt: _{{ .EndsAt }}_
+{{- end }}
+-------------------------------------
+{{- $filters := "" -}}
 {{ range .Annotations.SortedPairs -}}
-{{ .Name }}: {{ .Value}}
+{{- if .Value }}
+{{- if eq .Name "filters" }}
+{{- $filters = .Value -}}
+{{- end -}}
+{{- end -}}
 {{ end -}}
+{{ range .Annotations.SortedPairs -}}
+{{- if .Value }}
+{{- if  Contains $filters   .Name }}{{else}}
+{{ .Name }}:{{ .Value}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
